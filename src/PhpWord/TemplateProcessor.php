@@ -729,7 +729,17 @@ class TemplateProcessor
         }
 
         $rowStart = $this->findRowStart($tagPos);
-        $rowEnd = $this->findRowEnd($tagPos);
+        try {
+			$rowEndAfterRowStart = $this->findRowEnd($rowStart + 6);
+		} catch(Exception $e) {
+        	$rowEndAfterRowStart = false;
+		}
+		$rowEnd = $this->findRowEnd($tagPos);
+
+		if($rowEndAfterRowStart !== false && $rowEndAfterRowStart < $rowEnd) {
+			throw new Exception('Can not clone row, the template variable is not within a row');
+		}
+
         $xmlRow = $this->getSlice($rowStart, $rowEnd);
 
         // Check if there's a cell spanning multiple rows.
@@ -1123,6 +1133,21 @@ class TemplateProcessor
 
         return $rowEnd + 7;
     }
+
+     /**
+	 * Find the end position of the nearest table row before $offset.
+	 *
+	 * @param int $offset
+	 *
+	 * @throws \PhpOffice\PhpWord\Exception\Exception
+	 *
+	 * @return int
+	 */
+	protected function findRowEndAfter($offset) {
+		$rowEnd = strpos($this->tempDocumentMainPart, '</w:tr>', $offset);
+
+		return $rowEnd;
+	}
 
     /**
      * Get a slice of a string.

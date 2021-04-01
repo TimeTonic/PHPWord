@@ -1109,11 +1109,19 @@ class TemplateProcessor
      *
      * @param int $offset
      *
+     * @throws \PhpOffice\PhpWord\Exception\Exception
+     * 
      * @return int
      */
     protected function findRowEnd($offset)
     {
-        return strpos($this->tempDocumentMainPart, '</w:tr>', $offset) + 7;
+        $rowEnd = strpos($this->tempDocumentMainPart, '</w:tr>', $offset);
+
+        if (!$rowEnd) {
+            throw new Exception('Can not find the end position of the row to clone.');
+        }
+
+        return $rowEnd + 7;
     }
 
     /**
